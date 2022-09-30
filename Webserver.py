@@ -1,24 +1,27 @@
+import imp
 from os import listdir
 import socket
+import uasyncio
 
 class Webserver:
     """
     Webserver die zal gebruikt worden voor het connecteren met de wifi & QR voor connectie zal displayen.
     """
-    
+
     # Socket config
     __socket = None
     __ADDR = 0
     __RECEIVE_BUFFER_SIZE = pow(2, 10)
 
     # Endpoint config
-    __ENDPOINT_ROOT = "./endpoints"
+    __ENDPOINT_ROOT = ""
     __ENDPOINTS = []
 
-    def __init__(self, port = 8080, maxClients = 1) -> None:
+    def __init__(self,  endpoints="./endpoints", port = 8080, maxClients = 1) -> None:
         # Fetch none-reroute addr info en stel de readonly max client in.
         self.__ADDR = socket.getaddrinfo("0.0.0.0", port)[0][-1]
         self.__MAX_CLIENTS = maxClients
+        self.__ENDPOINT_ROOT = endpoints;
 
         # Creer socket object, bind op none-rerout (Niet op loopback address binden (127.0.0.1) dit is intern dus server niet toegankelijk)
         self.__socket = socket.socket()
@@ -33,18 +36,10 @@ class Webserver:
         for filename in listdir(self.__ENDPOINT_ROOT):
             self.__ENDPOINTS.append(filename.split(".html")[0])
 
-        print(self.__ENDPOINTS)
 
-
-    def start(self): 
-        # Start socket en wacht op inkomende connectie requests.
-        self.__socket.listen(self.__MAX_CLIENTS)
-
-        # Moet async worden met asyncio of alternatief gebaseerd op micropython
-        while True:
-            self.handleRequest()
-
-    def handleRequest(self):
+    def __handleRequest(self):
+        """
+        """
         client = None
         try:
             client, addr = self.__socket.accept()
@@ -69,7 +64,14 @@ class Webserver:
             if client is not None:
                 client.close()
 
-    
+    async def start(self): 
+        # Start socket en wacht op inkomende connectie requests.
+        self.__socket.listen(self.__MAX_CLIENTS)
+
+        # Moet async worden met asyncio of alternatief gebaseerd op micropython
+        while True:
+            self.__handleRequest()
+
 # Test functie, werkt enkel indien je de file direct in de python interpeter inlaad.
 if __name__ == "__main__": 
     Webserver().start()
