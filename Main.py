@@ -1,11 +1,6 @@
-from asyncore import read
-from glob import glob
-from os import listdir
-import uasyncio
-import json
-
 from Webserver import Webserver
 from Wifi import Wifi 
+import uasyncio
 
 www = None
 wifi = None
