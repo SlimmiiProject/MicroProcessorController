@@ -29,17 +29,7 @@ class WebserverRoute:
     @staticmethod
     def fetch(targetMethod, targetRoute):
         for method, route, callback in WebserverRoute.routes:
-            print((method, route, callback))
-            print((method == targetMethod, route == targetRoute, callback))
             if method == targetMethod and route == targetRoute:
                 return callback
         
         return False
-
-    @staticmethod
-    def status_404(params):
-        return "Page not found"
-
-    @staticmethod
-    def status_503(params):
-        return "<b>Server error:</b> {error}".format(error=params["error"])

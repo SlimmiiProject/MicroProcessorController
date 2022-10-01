@@ -17,7 +17,7 @@ class Webserver:
     __ADDR = 0
     __RECEIVE_BUFFER_SIZE = pow(2, 10)
 
-    def __init__(self,  endpoints="./endpoints", port = 8080, maxClients = 1) -> None:
+    def __init__(self,  port = 8080, maxClients = 1) -> None:
         
         # Fetch none-reroute addr info en stel de readonly max client in.
         self.__ADDR = socket.getaddrinfo("0.0.0.0", port)[0][-1]

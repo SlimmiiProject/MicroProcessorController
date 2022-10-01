@@ -62,9 +62,22 @@ class WebserverRequest:
 
     @classmethod
     def status_404(cls):
-        raise(Exception("Not implemented"))
+        def responseCallback(request, response):
+            return response.send("<h1>Page not found</h1>")
+
+        kwargs = WebserverRequest.__REQUEST_DATA
+        kwargs["STATUS_CODE"] = 404
+        kwargs["CALLBACK"] = responseCallback
+
+        return cls(**kwargs)
 
     @classmethod
     def status_503(cls, error = None):
-        params = {"error": str(error)}
-        pass
+        def responseCallback(request, response):
+            return response.send("<h1>Internal server error:</h1>{e}".format(e=error))
+
+        kwargs = WebserverRequest.__REQUEST_DATA
+        kwargs["STATUS_CODE"] = 504
+        kwargs["CALLBACK"] = responseCallback
+
+        return cls(**kwargs)

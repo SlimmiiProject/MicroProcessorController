@@ -32,7 +32,7 @@ async def __main():
     uasyncio.create_task(www.start())
     uasyncio.create_task(__update())
 
-    while True:
+    while True: # Loop main thread zodat het programma niet afsluit.
         await uasyncio.sleep_ms(10_000)
 
 async def __update(): 
