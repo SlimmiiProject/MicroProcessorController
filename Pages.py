@@ -1,6 +1,6 @@
  
 from re import search as searchPattern
-from Route import Route
+from WebserverRoute import WebserverRoute
 
 
 class Pages:
@@ -27,11 +27,11 @@ class Pages:
              
         return page
         
-    @Route.get("/")
+    @WebserverRoute.get("/")
     def index(request, response):
         return response.send(Pages.__readEndpointFile("index"))
 
-    @Route.get("/wifi")
+    @WebserverRoute.get("/wifi")
     def wifi(request, response):
         params = request.PARAMS
         if len(request.PARAMS) == 0 :

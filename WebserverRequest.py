@@ -1,7 +1,7 @@
 
 import re
 
-from Route import Route
+from WebserverRoute import WebserverRoute
 
 
 class WebserverRequest:
@@ -45,7 +45,7 @@ class WebserverRequest:
         method, endpoint = re.search(r"^[a-zA-Z]{3,7} \/[\S]*", requestStr).group().split(" ")
         endpoint = endpoint if endpoint != "/index" else "/"
 
-        requestParser = Route.fetchRoute(method, endpoint)
+        requestParser = WebserverRoute.fetch(method, endpoint)
         if not requestParser:
             print("Page not found sending 404")
             return WebserverRequest.status_404()

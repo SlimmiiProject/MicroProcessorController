@@ -1,6 +1,6 @@
 
 
-class Route:
+class WebserverRoute:
     routes = []
 
     @staticmethod
@@ -8,7 +8,7 @@ class Route:
         """
             Push a new request handler to the routes stack.
         """
-        Route.routes.append((method, route, callback));
+        WebserverRoute.routes.append((method, route, callback));
     
     @staticmethod
     def get(*args, **kwargs):
@@ -21,14 +21,14 @@ class Route:
 
         # Push de route op de routes stack en geef de originele functie terug (deze word enkel called op initializeren attribute )
         def targetFuncParser(func):
-            Route.__register("GET", route, func)
+            WebserverRoute.__register("GET", route, func)
             return func
         
         return targetFuncParser 
 
     @staticmethod
-    def fetchRoute(targetMethod, targetRoute):
-        for method, route, callback in Route.routes:
+    def fetch(targetMethod, targetRoute):
+        for method, route, callback in WebserverRoute.routes:
             print((method, route, callback))
             print((method == targetMethod, route == targetRoute, callback))
             if method == targetMethod and route == targetRoute:
