@@ -3,13 +3,6 @@ import os
 import json
 
 class Wifi: 
-    wpa = None
-    adhoc = None
-
-    def __init__(self) -> None:
-        self.wpa = self.CreateWPAInterface()
-        self.adhoc = self.CreateADHOCInterface()
-        
     def __connectionInfo(self): 
         """
             Load the connection information from the Wifi.bin file, or create if necessary 
@@ -53,13 +46,6 @@ class Wifi:
         ap.active(True)         
 
         return ap
-    
-    def update(self): 
-        if self.wpa is None or not self.wlan.isconnected():
-            wlan = wifi.CreateWPAInterface()
-            
-        if self.adhoc is None:
-            wlan = wifi.CreateWPAInterface()
 
 if __name__ == "__main__":
     wifi = Wifi()
