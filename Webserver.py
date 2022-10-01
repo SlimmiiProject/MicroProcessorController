@@ -2,55 +2,10 @@ from os import listdir
 import socket
 import re
 
-from numpy import mat
+from WebserverRequest import WebserverRequest
+from WebserverResponse import WebserverResponse
+from Pages import Pages # Laten staan, is nodig om de webpaginas in te laden.
 
-
-class Pages:
-    @staticmethod 
-    def __readEndpointFile(name): 
-        file = open("{ROOT}/{NAME}.html".format(ROOT="./endpoints", NAME=name), "r")
-        page = "".join(file.readlines())
-
-        return page
-
-    @staticmethod
-    def __parseParameters(page, params):
-        match = re.search(r"\{(.*?)\}", page)
-
-        while True:
-            match =  re.search(r"\{(.*?)\}", page)
-            if match is None :
-                break
-
-            match = match.group()
-            key = str(match)[1:-1]
-            page = page.replace(match, params[key])
-             
-        return page
-        
-    @staticmethod
-    def index(params):
-        return Pages.__readEndpointFile("index")
-
-    @staticmethod
-    def wifi(params):
-        if len(params) == 0 :
-            params["MESSAGE"] = ""
-        elif not all(i in params.keys() for i in ["ssid", "password"]):
-            params["MESSAGE"] = "Wifi SSID or password was not set"
-        else:
-            params["MESSAGE"] = "Wifi succesfully set."
-        
-            
-        return  Pages.__parseParameters(Pages.__readEndpointFile("wifi"), params)
-
-    @staticmethod
-    def status_404(params):
-        return "Page not found"
-
-    @staticmethod
-    def status_503(params):
-        return "<b>Server error:</b> {error}".format(error=params["error"])
 
 class Webserver:
     """
@@ -61,10 +16,6 @@ class Webserver:
     __socket = None
     __ADDR = 0
     __RECEIVE_BUFFER_SIZE = pow(2, 10)
-
-    # Endpoint config
-    __ENDPOINTS = []
-    __CUSTOM_PARSER = {}
 
     def __init__(self,  endpoints="./endpoints", port = 8080, maxClients = 1) -> None:
         
@@ -89,26 +40,17 @@ class Webserver:
             print("Client connected from: {client_addr}".format(client_addr=addr))
             client_request = client.recv(self.__RECEIVE_BUFFER_SIZE)
 
-            status_code = -1
-            request = Pages.status_503
             try: 
-                # Split HTTP request, fetch GET lijn, Split lijn en fetch 2de index (1) (GET /ENDPOINT HTTP1.0)
-                requestType, endpoint, _ = list(filter(lambda i: "GET" in i, client_request.decode("utf-8").split("\n")))[0].split(" ")
-                endpoint = endpoint[1:] if len(endpoint) > 1 else "index" # Strip leading backslash (/)
-                params = {}
-                if "?" in endpoint:
-                    params = dict([ i.split("=") for i in endpoint.split("?")[-1].split("&")])
-                    endpoint = endpoint.split("?")[0]
-
+                request = WebserverRequest.parse(client_request.decode("utf-8"))
             except Exception as e: 
-                status_code = 504
-                params = {"error": str(e)}
+                print(e)
+                request = WebserverRequest.status_503(e)
             finally:
-                if status_code < 0: 
-                    status_code = 200 if endpoint in Pages.__dict__.keys() else 404
-                    request = Pages.__dict__[endpoint] if status_code == 200 else Pages.status_404
+                response = WebserverResponse(client, request)
+                request.SendResponse(response)
+                
+                # client.send(bytes('HTTP/1.0 {STATUS} OK\r\nContent-type: text/html\r\n\r\n{RESPONSE}'.format(STATUS=request.STATUS_CODE, RESPONSE=requestParser(params)), "utf-8"))
 
-            client.send(bytes('HTTP/1.0 {STATUS} OK\r\nContent-type: text/html\r\n\r\n{RESPONSE}'.format(STATUS=status_code, RESPONSE=request(params)), "utf-8"))
         except OSError as e:
             print("Failed loading endpoint")
         finally:
