@@ -7,46 +7,45 @@ import json
 from Webserver import Webserver
 from Wifi import Wifi 
 
-wifi = None
 www = None
+wifi = None
+
 
 def __init():
+    """
+        Devicie initializiation 
+    """
     # Gebruik globale variabele niet enkel in deze scope.
     global wifi
-    global webserver
-
-    # Creer wifi bestand indien nodig, gebruik XOR flip op karakters zodat data niet ruw wordt neergeschreven.
-    # (close writer/reader, er is geen using in micropython anders blijft deze in memory)
-    conInfo = """{"ssid":"", "password":""}"""
-    if not "wifi.bin" in listdir("./"):
-        writer = open("./wifi.bin", "x")
-        writer.write("".join([chr(ord(i)^129) for i in conInfo]))
-        writer.close()
-
-    # Lees wifi bin bestand in terug met XOR flip om ze te herstellen.
-    reader = open("./wifi.bin", "r")
-    print(json.loads("".join([chr(ord(i)^129) for i in reader.readline()])))
-    reader.close()
+    global www
 
     # Initalizeer noodzakelijke componenten  
-    wifi = Wifi(conInfo)
     www = Webserver(port=8080, maxClients=1)
 
+    # Maakt WLAN en ADHOC connectie aan (Wifi/AccessPoint)
+    wifi = Wifi()
     
-
 async def __main():
+    """
+        Main device execution function
+    """
     # Gebruik globale variabele niet enkel in deze scope.
     global wifi
-    global webserver
-
-    # Maakt WLAN en ADHOC connectie aan (Wifi/AccessPoint)
-    wlan = wifi.CreateConnectionInterface()
-    adhoc = wifi.CreateHotspotInterface()
+    global www
 
     # Voeg de webserver start functie als task toe aan asyncio voor uit te voeren.
     uasyncio.create_task(www.start())
+    uasyncio.create_task(__update())
+
     while True:
         await uasyncio.sleep_ms(10_000)
+
+async def __update(): 
+    """
+        Reserved for device updates, wifi checks, etc...
+    """
+    while True:
+        wifi.update()
 
 # Main entry point, indien python interpeter naar dit bestand is gericht.
 if __name__ == "__main__":

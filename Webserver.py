@@ -5,7 +5,7 @@ import uasyncio
 
 class Webserver:
     """
-    Webserver die zal gebruikt worden voor het connecteren met de wifi & QR voor connectie zal displayen.
+        Internal webserver, used for updating wifi connection and presenting QR code to end user to link device to main server.
     """
 
     # Socket config
@@ -18,6 +18,7 @@ class Webserver:
     __ENDPOINTS = []
 
     def __init__(self,  endpoints="./endpoints", port = 8080, maxClients = 1) -> None:
+        
         # Fetch none-reroute addr info en stel de readonly max client in.
         self.__ADDR = socket.getaddrinfo("0.0.0.0", port)[0][-1]
         self.__MAX_CLIENTS = maxClients
@@ -32,6 +33,9 @@ class Webserver:
 
 
     def __setupEndpoints(self): 
+        """
+            Load HTML endpoints (Mayby add support for other file extension (ex: CSS) in future if device is here)
+        """
         # Laad endpoints in en push op de endpoint stack.
         for filename in listdir(self.__ENDPOINT_ROOT):
             self.__ENDPOINTS.append(filename.split(".html")[0])
@@ -39,6 +43,7 @@ class Webserver:
 
     def __handleRequest(self):
         """
+            Handle an incomming client request, and present 404 or page content.
         """
         client = None
         try:
@@ -65,6 +70,9 @@ class Webserver:
                 client.close()
 
     async def start(self): 
+        """
+            Start server and wait for incomming client requests.
+        """
         # Start socket en wacht op inkomende connectie requests.
         self.__socket.listen(self.__MAX_CLIENTS)
 
