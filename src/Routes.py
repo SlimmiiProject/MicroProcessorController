@@ -1,8 +1,8 @@
  
 from re import search as searchPattern
 
-from components.Redirect import Redirect
-from components.WifiSelector import WifiSelector
+from components.scripts.Redirect import Redirect
+from components.layout.forms.WifiSelector import WifiSelector
 from net.www.WebserverRoute import WebserverRoute
 
 
