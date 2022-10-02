@@ -1,0 +1,42 @@
+body
+{
+    margin: 0;
+    padding: 0;
+}
+
+header 
+{
+    padding-left: 2rem;
+}
+
+input[type="submit"]
+{
+    margin: 1rem 2rem 2rem auto;
+}
+label
+{
+    margin-right:1rem;
+}
+
+label::before, input[type="submit"]
+{
+    margin-top:0.4rem;
+    content: " ";
+    display: block;
+}
+
+main 
+{
+    margin: 5rem;
+    border: 2px black solid;
+    padding-left: 2rem;
+}
+
+@media screen and (min-width: 960px) {
+    body
+    {
+        width: 50%;
+        margin: 0 auto;
+        padding: 0;
+    }
+}

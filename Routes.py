@@ -20,7 +20,12 @@ class Routes:
     @WebserverRoute.post("/wifi")
     def wifi(request, response):
         params = request.PARAMS
-        message = "Wifi succesfully set."
+        message = """
+            <b>Attempting to connect to {ssid}...</b>
+            <script type="text/javascript">
+                setTimeout(() => window.location.assign("/"), 5000)
+            </script>
+        """.format(ssid=" ".join(params["ssid"].split("+")))
         if not len(request.PARAMS):
             message = "Wifi not connected, please connect to a wifi access point."
         elif not all(i in params.keys() for i in ["ssid", "password"]):

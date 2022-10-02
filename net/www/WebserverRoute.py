@@ -1,8 +1,4 @@
 
-
-from ast import arg
-
-
 class WebserverRoute:
     routes = []
 
@@ -16,7 +12,7 @@ class WebserverRoute:
     @staticmethod
     def __parseRouteFromArgs(*args, **kwargs):
         """
-            Parser for request method registrar attributes
+            Route parser for request method registrar attributes
         """
         # Controleer of een naamloze parameter is meegeven en deze een string is of een named parameter route is gevonden met een string waarde.
         assert (len(args) == 1 and isinstance(args[0], str)) \

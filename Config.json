@@ -1,0 +1,5 @@
+{
+    "PORT": 8080,
+    "SERIAL_LENGTH": 64,
+    "WIFI_BIN": "./Wifi.bin"
+}

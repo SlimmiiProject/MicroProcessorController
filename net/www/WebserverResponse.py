@@ -1,30 +1,59 @@
 from re import search
 
+from net.www.mime.MimeBaseTypes import MimeBaseTypes
+from net.www.mime.MimeTypes import MimeTypes
+
+
 class WebserverResponse: 
     __client = None
-    __request = None
 
-    def __init__(self, client, request) -> None:
+    http_version = "HTTP/1.1"
+    status_code = 200
+    content_type = "text/html"
+
+    def __init__(self, client) -> None:
         self.__client = client
-        self.__request = request
 
-    def send(self, html):                
-        return self.__client.send(bytes('HTTP/1.0 {STATUS} OK\r\nContent-type: text/html\r\n\r\n{RESPONSE}'.format(STATUS=self.__request.STATUS_CODE, RESPONSE=html), "utf-8"))
+    def send(self, data):   
+        header = '{VERSION} {STATUS} OK\r\nContent-type: {CONTENT_TYPE}\r\n\r\n'.format(VERSION=self.http_version,STATUS=self.status_code, CONTENT_TYPE=self.content_type)
+        data = bytes(data, "utf-8") if isinstance(data, str) else data
+
+        if data is not None:
+            self.__client.send(bytes(header, "utf-8"))
+            self.__client.send(data)
          
-    def render(self, endpoint, **kwargs):                
-        html = self.__parseParameters(self.__readEndpointFile(endpoint[1:]), **kwargs)
-        return self.__client.send(bytes('HTTP/1.0 {STATUS} OK\r\nContent-type: text/html\r\n\r\n{RESPONSE}'.format(STATUS=self.__request.STATUS_CODE, RESPONSE=html), "utf-8"))
-         
+    def render(self, endpoint, **kwargs):     
+        html = self.__parseParameters(self.sendFile(endpoint[1:]+".html", MimeTypes[".html"]), **kwargs)
+        return self.send(html)
+    
+    def sendFile(self, endpoint, content_type):
+        self.content_type, file_ext = [content_type, "."+endpoint.split(".")[-1]]
+   
+        if file_ext in MimeBaseTypes[str]:
+            content = self.__readTextFile(endpoint)
+        elif file_ext in MimeBaseTypes[bytes]:
+            content = self.__readBinaryFile(endpoint[1:])
+        
+        return self.send(content)
+
     @staticmethod 
-    def __readEndpointFile(endpoint): 
-        file = open("{ROOT}/{NAME}.html".format(ROOT="./routes", NAME=endpoint), "r")
+    def __readTextFile(endpoint): 
+        file = open("{ROOT}/{NAME}".format(ROOT="./routes", NAME=endpoint), "r")
         page = "".join(file.readlines())
+        file.close()
 
         return page
+    @staticmethod 
+    def __readBinaryFile(endpoint): 
+        file = open("{ROOT}/{NAME}".format(ROOT="./routes", NAME=endpoint), "rb")
+        binary = file.read()
+        file.close()
+
+        return binary
 
     @staticmethod
     def __parseParameters(html, **kwargs):
-        while True: 
+        while html is not None: 
             # Zoek {KEY_NAAM} in de pagina broncode. 
             match =  search(r"\{(.*?)\}", html)
             if match is None:

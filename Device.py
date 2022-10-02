@@ -11,9 +11,9 @@ class __Device:
     def serial_no(self):
         if "serial" not in listdir("./"):
             writer = open("serial", "x")
-            writer.write("".join([str(random.randint(0, 9)) if i % 2 == 0 else chr(random.randint(64, 64+26)) for i in range(self.__SERIAL_LENGTH)]))
+            writer.write("".join([str(random.randint(0, 9)) if i % 2 == 0 else chr(random.randint(65, 65+26)) for i in range(self.__SERIAL_LENGTH)]))
             writer.close()
-
+        
         reader = open("serial", "r")
         output = reader.readline()
         reader.close()
