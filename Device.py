@@ -1,7 +1,8 @@
+from os import listdir
 import random
 import sys
 
-#import machine
+import machine
 
 class __Device: 
     __SERIAL_LENGTH = 64
