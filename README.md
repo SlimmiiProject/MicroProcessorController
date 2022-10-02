@@ -7,7 +7,7 @@
 
 # About this project
 
-Script written in Micropython that will give the Raspberry Pico W it's instructions to take a picture of your electricity meter with an interval. This data gets sent to the server by an REST API endpoint. There the data will get processed further.
+Script written in Micropython that will give the Freenove Wrover ESP32 CAM it's instructions to take a picture of your electricity meter with an interval. This data gets sent to the server by an REST API endpoint. There the data will get processed further.
 Script written in Micropython that will give the Raspberry Pico W it's instructions to take a picture of your electricity meter with an interval. This data gets sent to the server by an REST API endpoint. There the data will get processed further.
 
 # Contributors
