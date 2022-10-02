@@ -1,6 +1,6 @@
 
 from net.www.Webserver import Webserver
-from net.Wifi import Wifi 
+from src.net.Wifi import Wifi 
 import uasyncio
 import gc
 

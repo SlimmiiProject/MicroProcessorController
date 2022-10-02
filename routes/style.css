@@ -1,42 +1,47 @@
-body
+body, *
 {
     margin: 0;
     padding: 0;
 }
+body { background-color: rgb(20, 20, 20); width: 95%; margin: 0 auto;}
+main { background-color: rgb(40, 40, 40);}
+header span  { padding: 2rem; color: white; display: block; font-size: 3rem;}
 
-header 
+section
 {
-    padding-left: 2rem;
+    padding: 2rem;
+    background-color: rgb(200, 200, 200);
+    box-shadow: 1px 0 rgb(60, 60, 60);
+    border: .5rem solid rgb(30, 30, 30);
+    border-left: 0;
+    border-right: 0; 
 }
 
-input[type="submit"]
-{
-    margin: 1rem 2rem 2rem auto;
-}
-label
-{
-    margin-right:1rem;
-}
+article { width: 50%; }
 
-label::before, input[type="submit"]
-{
-    margin-top:0.4rem;
-    content: " ";
-    display: block;
-}
-
-main 
-{
-    margin: 5rem;
-    border: 2px black solid;
-    padding-left: 2rem;
-}
-
-@media screen and (min-width: 960px) {
+@media screen and (min-width: 568px) {
     body
     {
-        width: 50%;
-        margin: 0 auto;
-        padding: 0;
+        width: 80%;
     }
 }
+
+ul { list-style-type: none; background-color: rgb(30,30,30); color: white; text-shadow: black 3px 3px 3px; border-radius: 1rem 1rem 0 0; box-shadow: 1px -1px  rgb(60, 60, 60); }
+li { display: inline-block; padding: 0.8rem;}
+li:hover { text-shadow: rgb(60, 60, 60) 3px 3px 3px;}
+
+input[type="submit"] { margin: 1rem 2rem 2rem auto; padding: .5rem 4rem; background-color: rgb(60, 60, 60); color: white; border: 1px solid black; border-radius: .5rem;} 
+label { width: 50%; display: inline-block; }
+input { width: 45%; display: inline-block;}
+
+label::before, input[type="submit"] { margin-top:0.4rem; content: " "; display: block; }
+label::after {display: block; width: 30px; }
+
+/* Short hands */
+.text-center { text-align: center;}
+.f-white { color: white; }
+.f-large { font-size: 2rem; text-shadow: 2px 2px 2px rgb(40, 40, 40);}
+.p-1 {padding: 1rem;}
+.py-2 { padding: 1rem 0;}
+.mx-auto {margin: 0 auto;}
+.d-block {display: block;}

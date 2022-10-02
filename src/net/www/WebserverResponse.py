@@ -1,5 +1,9 @@
 from re import search
 
+from components.layout.Footer import Footer
+from components.layout.Header import Header
+from components.layout.Navbar import Navbar
+
 from net.www.mime.MimeBaseTypes import MimeBaseTypes
 from net.www.mime.MimeTypes import MimeTypes
 
@@ -10,6 +14,12 @@ class WebserverResponse:
     http_version = "HTTP/1.1"
     status_code = 200
     content_type = "text/html"
+
+    __DEFAULT_PARAMS = {
+        "HEADER": Header(),
+        "NAVBAR": Navbar(),
+        "FOOTER": Footer(),
+    }
 
     def __init__(self, client) -> None:
         self.__client = client
@@ -23,14 +33,13 @@ class WebserverResponse:
             self.__client.send(data)
          
     def render(self, endpoint, **kwargs):     
-        html = self.__parseParameters(self.sendFile(endpoint[1:]+".html", MimeTypes[".html"]), **kwargs)
-        return self.send(html)
+        return self.sendFile(endpoint[1:]+".html", MimeTypes[".html"], **kwargs)
     
-    def sendFile(self, endpoint, content_type):
+    def sendFile(self, endpoint, content_type, **kwargs):
         self.content_type, file_ext = [content_type, "."+endpoint.split(".")[-1]]
    
         if file_ext in MimeBaseTypes[str]:
-            content = self.__readTextFile(endpoint)
+            content = self.__parseParameters(self.__readTextFile(endpoint), **kwargs)
         elif file_ext in MimeBaseTypes[bytes]:
             content = self.__readBinaryFile(endpoint[1:])
         
@@ -53,15 +62,16 @@ class WebserverResponse:
 
     @staticmethod
     def __parseParameters(html, **kwargs):
+        kwargs = {**kwargs, **WebserverResponse.__DEFAULT_PARAMS}
         while html is not None: 
             # Zoek {KEY_NAAM} in de pagina broncode. 
-            match =  search(r"\{(.*?)\}", html)
+            match =  search(r"\{%(.*?)%\}", html)
             if match is None:
                 break
 
             # Parse match en key voor parameter hashmap.
             match = match.group()
-            key = str(match)[1:-1]
+            key = str(match)[2:-2]
             
             html = html.replace(match, kwargs[key])
              

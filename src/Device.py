@@ -2,7 +2,10 @@ from os import listdir
 import random
 import sys
 
-import machine
+try:
+    import machine
+except ModuleNotFoundError as e: 
+    print(e)
 
 class __Device: 
     __SERIAL_LENGTH = 64
@@ -13,7 +16,7 @@ class __Device:
             writer = open("serial", "x")
             writer.write("".join([str(random.randint(0, 9)) if i % 2 == 0 else chr(random.randint(65, 65+26)) for i in range(self.__SERIAL_LENGTH)]))
             writer.close()
-        
+
         reader = open("serial", "r")
         output = reader.readline()
         reader.close()

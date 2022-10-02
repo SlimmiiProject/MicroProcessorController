@@ -13,22 +13,22 @@
     <main>
         <section>
             <article class=" mx-auto d-block">
-                <h1 class="text-center f-white f-large">Connect to wifi</h1>
-                <p class="py-2">
+                <h1 class="text-center f-white f-large">Change the local access point password</h1>
+                <p class="p-1">
                     {%MESSAGE%}
                 </p>
         
                 <form method="POST">
-                    <label for="ssid">Wifi-SSID:</label> 
-                    {%SSID_SELECTOR%}
-                    <br />
                     <label for="password">Password:</label>
-                    <input type="password" name="password" />
+                    <input type="password" name="password" /><br />
+                    <label for="password_verify">Verify password:</label>
+                    <input type="password" name="password_verify" />
         
-                    <input type="submit" value="Login" />
+                    <input type="submit" value="Change password" />
                 </form>
             </article>
         </section>
+
     </main> 
 </body>
 </html>

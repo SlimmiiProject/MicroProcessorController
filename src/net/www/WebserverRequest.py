@@ -1,9 +1,11 @@
 
 import re
+from components.layout.Header import Header
 from net.www.mime.MimeBaseTypes import MimeBaseTypes
 from net.www.mime.MimeTypes import MimeTypes
 
 from net.www.WebserverRoute import WebserverRoute
+from Device import device
 
 class WebserverRequest:
     __REQUEST_DATA = {
@@ -16,6 +18,7 @@ class WebserverRequest:
 
     def __init__(self, **kwargs) -> None:
         assert all([key in kwargs.keys() for key in self.__REQUEST_DATA.keys()])
+
         self.__REQUEST_DATA = kwargs
     
     def __getKey(self, key): 
@@ -28,7 +31,19 @@ class WebserverRequest:
         """
             Execute request parser callback with response as parameter
         """
-        return self.__getKey("CALLBACK")(self, self.__getKey("RESPONSE"))
+        response = self.__getKey("RESPONSE")
+
+        try:
+            self.__getKey("CALLBACK")(self, response)
+        except OSError as e:
+            if response.status_code != 503:
+                return WebserverRequest.status_503(response, e).sendResponse()
+            
+            print("Fatal webserver exception")
+            print(e)
+            #print("Fatal webserver exception, soft-rebooting device...")
+            #device.soft_reset()
+
 
     @staticmethod
     def __parseParams(method, endpoint, request_header): 
@@ -73,27 +88,28 @@ class WebserverRequest:
         """
             Parse HTTP Request header to WebserverRequest
         """
-        
         # Zoek achter de request method & endpoint met regex 
+        if not len(request_header):
+            return WebserverRequest.status_503(response)
         method, endpoint = re.search(r"^[a-zA-Z]{3,7} \/[\S]*", request_header).group().split(" ")
         endpoint, abs_path = [
             endpoint if endpoint != "/index" else "/", 
             endpoint.split("?")[0] if "?" in endpoint else endpoint
         ]
         
-        # Parse object als file request.
-        if "." in abs_path:
-            file_ext = "."+abs_path.split(".")[-1]
-            print( MimeBaseTypes.values())
-            print(any([file_ext in set for set in MimeBaseTypes.values()]))
-            if any([file_ext in set for set in MimeBaseTypes.values()]):
-                return WebserverRequest.__sendFile(abs_path, response)
-
-        # Parse HTML
+        # Parse object als file request als er geen specifieke parser is gevonden voor de route en file parsing mogelijk is
         requestParser = WebserverRoute.fetch(method, abs_path)
         if not requestParser:
-            return WebserverRequest.status_404(response)
+            if not "." in abs_path:
+                return WebserverRequest.status_404(response)
+            
+            file_ext = "."+abs_path.split(".")[-1]
+            if any([file_ext in set for set in MimeBaseTypes.values()]):
+                return WebserverRequest.__sendFile(abs_path, response)
+                
+            return WebserverRequest.status_503(response);
 
+        # Parse HTML
         params = WebserverRequest.__parseParams(method, endpoint, request_header)
         return cls(**{
             "REQUEST_METHOD": method,
