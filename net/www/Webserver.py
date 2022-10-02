@@ -2,9 +2,9 @@ from os import listdir
 import socket
 import re
 
-from WebserverRequest import WebserverRequest
-from WebserverResponse import WebserverResponse
-from Pages import Pages # Laten staan, is nodig om de webpaginas in te laden.
+from Routes import Routes
+from net.www.WebserverResponse import WebserverResponse # Laten staan, is nodig om de webpaginas in te laden.
+from net.www.WebserverRequest import WebserverRequest # Laten staan, is nodig om de webpaginas in te laden.
 
 
 class Webserver:
@@ -13,8 +13,6 @@ class Webserver:
     """
 
     # Socket config
-    __socket = None
-    __ADDR = 0
     __RECEIVE_BUFFER_SIZE = pow(2, 10)
 
     def __init__(self,  port = 8080, maxClients = 1) -> None:
@@ -39,18 +37,14 @@ class Webserver:
             client, addr = self.__socket.accept()
             print("Client connected from: {client_addr}".format(client_addr=addr))
             client_request = client.recv(self.__RECEIVE_BUFFER_SIZE)
-
+            
             try: 
                 request = WebserverRequest.parse(client_request.decode("utf-8"))
             except Exception as e: 
-                print(e)
                 request = WebserverRequest.status_503(e)
             finally:
                 response = WebserverResponse(client, request)
-                request.SendResponse(response)
-                
-                # client.send(bytes('HTTP/1.0 {STATUS} OK\r\nContent-type: text/html\r\n\r\n{RESPONSE}'.format(STATUS=request.STATUS_CODE, RESPONSE=requestParser(params)), "utf-8"))
-
+                request.sendResponse(response)
         except OSError as e:
             print("Failed loading endpoint")
         finally:

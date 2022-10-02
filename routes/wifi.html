@@ -11,8 +11,12 @@
 
     <main>
         {MESSAGE}
-        <form onsubmit="">
+        <form method="POST">
+            <label for="ssid">Wifi-SSID:</label> {SSID_SELECTOR}
             
+            <label for="password">Password:</label>
+            <input type="password" name="password" />
+            <input type="submit" value="Login" />
         </form>
     </main> 
 </body>

@@ -1,6 +1,11 @@
-from Webserver import Webserver
-from Wifi import Wifi 
+
+from net.www.Webserver import Webserver
+from net.Wifi import Wifi 
 import uasyncio
+import gc
+
+gc.collect()
+
 
 www = None
 wifi = None
