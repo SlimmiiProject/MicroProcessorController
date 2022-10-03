@@ -3,6 +3,7 @@
  ![](https://img.shields.io/badge/Micropython-blue.svg)
  ![](https://img.shields.io/badge/Raspberry_Pico_W-blue.svg)
  ![](https://img.shields.io/badge/Owner-Andie_Similon-blue.svg) ![](https://img.shields.io/badge/Project%20Status-Incomplete-red.svg)
+ [![Build](https://github.com/SlimmiiProject/MicroProcessorController/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/SlimmiiProject/MicroProcessorController/actions/workflows/codeql-analysis.yml)
 
 
 # About this project
