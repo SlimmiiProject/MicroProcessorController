@@ -28,7 +28,7 @@ Script written in Micropython that will give the Raspberry Pico W it's instructi
 
 </ul>
 
-<a href="https://github.com/GremlinsAP/TheOne/graphs/contributors">
+<a href="https://github.com/SlimmiiProject/MicroProcessorController/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=SlimmiiProject/MicroProcessorController" style="margin-top:1rem"/>
 </a>
 
