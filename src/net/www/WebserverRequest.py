@@ -55,7 +55,7 @@ class WebserverRequest:
             
         params = parseSet(endpoint)
         if method.upper() == "POST":
-            params = {**params, **parseSet("?"+request_header.split("\n")[-1])}
+            params = params # {k:v for set in [params, parseSet("?"+request_header.split("\n")[-1])] for k,v in set}
 
         return params
     
@@ -91,7 +91,9 @@ class WebserverRequest:
         # Zoek achter de request method & endpoint met regex 
         if not len(request_header):
             return WebserverRequest.status_503(response)
-        method, endpoint = re.search(r"^[a-zA-Z]{3,7} \/[\S]*", request_header).group().split(" ")
+        
+        print(request_header)
+        method, endpoint, _ = request_header.split("\n")[0].split(" ")
         endpoint, abs_path = [
             endpoint if endpoint != "/index" else "/", 
             endpoint.split("?")[0] if "?" in endpoint else endpoint
@@ -163,3 +165,4 @@ class WebserverRequest:
 
         return cls(**kwargs)
     #endregion
+

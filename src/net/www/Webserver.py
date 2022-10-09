@@ -1,6 +1,7 @@
 from os import listdir
 import socket
 import re
+import uasyncio
 
 from Routes import Routes # Laten staan, is nodig om de webpaginas in te laden.
 from net.www.WebserverResponse import WebserverResponse 
@@ -15,7 +16,7 @@ class Webserver:
     # Socket config
     __RECEIVE_BUFFER_SIZE = pow(2, 10)
 
-    def __init__(self,  port = 8080, maxClients = 1) -> None:
+    def __init__(self,  port = 80, maxClients = 1) -> None:
         """
             Initialize socket and private properties.
         """
@@ -26,6 +27,8 @@ class Webserver:
         # Creer socket object, bind op none-rerout (Niet op loopback address binden (127.0.0.1) dit is intern dus server niet toegankelijk)
         self.__socket = socket.socket()
         self.__socket.bind(self.__ADDR)
+        self.__socket.listen(self.__MAX_CLIENTS)
+        self.__socket.setblocking(False)
         
 
 
@@ -37,18 +40,20 @@ class Webserver:
         client = None
             
         try:
-            client, addr = self.__socket.accept()
-            print("Client connected from: {client_addr}".format(client_addr=addr))
-            client_request = client.recv(self.__RECEIVE_BUFFER_SIZE)
-            
-            response = WebserverResponse(client)
-            request = WebserverRequest.parse(response, client_request.decode("utf-8"))
-            request.sendResponse()
+
             try:
-                pass
+                client, addr = self.__socket.accept()
+                client.setblocking(True)
+                
+                print("Client connected from: {client_addr}".format(client_addr=addr))
+                client_request = client.recv(self.__RECEIVE_BUFFER_SIZE).decode("utf-8")
+                
+                response = WebserverResponse(client)
+                request = WebserverRequest.parse(response, client_request)
+                request.sendResponse()
             except Exception as e:
-                print("error")
-                print(e)
+                if not e.errno == 11:
+                    raise (e)
         except OSError as e:
             print("Failed loading endpoint")
             print(e)
@@ -61,11 +66,12 @@ class Webserver:
             Start server and wait for incomming client requests.
         """
         # Start socket en wacht op inkomende connectie requests.
-        self.__socket.listen(self.__MAX_CLIENTS)
-
+        print("starting webserver")
         # Moet async worden met asyncio of alternatief gebaseerd op micropython
         while True:
             self.__handleRequest()
+            
+            await uasyncio.sleep_ms(100)
 
 # Test functie, werkt enkel indien je de file direct in de python interpeter inlaad.
 if __name__ == "__main__": 

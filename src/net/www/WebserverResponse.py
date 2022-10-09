@@ -62,7 +62,8 @@ class WebserverResponse:
 
     @staticmethod
     def __parseParameters(html, **kwargs):
-        kwargs = {**kwargs, **WebserverResponse.__DEFAULT_PARAMS}
+
+        kwargs = {k: v for d in [kwargs, WebserverResponse.__DEFAULT_PARAMS] for k, v in d.items()}
         while html is not None: 
             # Zoek {KEY_NAAM} in de pagina broncode. 
             match =  search(r"\{%(.*?)%\}", html)
@@ -70,7 +71,7 @@ class WebserverResponse:
                 break
 
             # Parse match en key voor parameter hashmap.
-            match = match.group()
+            match = match.group(0)
             key = str(match)[2:-2]
             
             html = html.replace(match, kwargs[key])

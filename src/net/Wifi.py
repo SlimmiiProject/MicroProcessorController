@@ -1,67 +1,83 @@
-import network
 import os
 import json
+import network
+from net.WifiConfig import WifiConfig
+from Logger import print_log, print_error
 
-class Wifi: 
+class __Wifi: 
     __wpa = None
     __adhoc = None
+    
+    def __init__(self):
+        print_log(self, "Initializing network interface...")
+        
+        self.__adhoc = self.__CreateADHOCInterface()
+        self.__wpa = self.__CreateWPAInterface()
+        
+        self.__wpa.scan()
+        if WifiConfig.wlan_ssid in [network["ssid"] for network in self.networks]:
+            print_log(self, "Found previous connected wifi network, connecting to: {SSID}".format(SSID=WifiConfig.wlan_ssid))
+            
+            try:
+                self.connect()
+                print_log(self, "Wifi connection established assigned ip: {IP}".format(IP=self.ip_adress))
+            except OSError:
+                 print_error(self, "Failed to connect to network...")
+        else:
+             print_log(self, "No previous networks found")
+        
 
-    def __connectionInfo(self): 
-        """
-            Load the connection information from the Wifi.bin file, or create if necessary 
-        """
-        # Creer wifi bestand indien nodig, gebruik XOR flip op karakters zodat data niet ruw wordt neergeschreven.
-        # (close writer/reader, er is geen using in micropython anders blijft deze in memory)
-        conInfoTemplate = """{"ssid":"ESP_000111", "password": "", "adhoc_password": "C0nn3ctT0Th3Sl1m1nn1M3t3rW1thTh1sP4ssw0rd"}"""
-        if not "wifi.bin" in os.listdir("./"):
-            writer = open("./wifi.bin", "x")
-            writer.write("".join([chr(ord(i)^129) for i in conInfoTemplate]))
-            writer.close()
-
-        # Lees wifi bin bestand in terug met XOR flip om ze te herstellen.
-        reader = open("./wifi.bin", "r")
-        conInfo = json.loads("".join([chr(ord(i)^129) for i in reader.readline()]))
-        reader.close()
-
-        return conInfo
-
-    def CreateWPAInterface(self):
+    def __CreateWPAInterface(self):
         """
             Create WPA/WPAv2 connection interface (Wi-Fi protectec access)
         """
-        conInfo = self.__connectionInfo()
 
         inf = network.WLAN(network.STA_IF)
         inf.active(True)
-        inf.connect(conInfo["ssid"], conInfo["password"])
-            
+        
         return inf
 
-    def CreateADHOCInterface(self):
+    def __CreateADHOCInterface(self, ip = '192.168.4.1', subnet =  '255.255.255.0', gateway = '192.168.4.1', dns = '1.1.1.1'):
         """
             Create AD-HOC connection interface (Access point)
         """
-        conInfo = self.__connectionInfo()
 
         ap = network.WLAN(network.AP_IF)
-        ap.config(essid="SlimmiiMeter", password=conInfo["adhoc_password"], max_clients=1)      
-
+        ap.config(essid="SlimmiiMeter", password=WifiConfig.adhoc_password)
+        print(ap.ifconfig())
+        ap.ifconfig((ip, subnet, gateway, dns))
         ap.active(True)         
 
         return ap
 
-    def update(self):
-        try:
-            #if self.__wpa is None or not self.__wpa.isconnected():
-            #    self.__wpa = self.CreateWPAInterface()
-
-            if self.__adhoc is None:
-                self.__adhoc = self.CreateADHOCInterface()
-
-            if self.__wpa is None:
-                self.__wpa = self.CreateWPAInterface()
-                print(self.__wpa.scan())
-
-            
-        except OSError as e:
-            print(e)
+    @property
+    def ip_adress(self):
+        return self.__wpa.ifconfig()[0] if self.wifi_connected else None
+    
+    @property
+    def wifi_connected(self):
+        return self.__wpa.isconnected()
+    
+    @property
+    def adhoc_ip_adress(self):
+        return self.__adhoc.ifconfig()[0] if self.__adhoc else None
+    
+    @property
+    def networks(self):
+        return [{
+             "ssid": ssid.decode("utf-8"),
+             "bssid": bssid,
+             "channel": channel,
+             "rssi": RSSI,
+             "security": security,
+             "hidden": hidden
+        } for ssid, bssid, channel, RSSI, security, hidden in self.__wpa.scan()]
+    
+    def connect(self):
+        return self.__wpa.connect(WifiConfig.wlan_ssid, WifiConfig.wlan_password)
+    
+    def reset_adhoc(self):
+        addr = self.__adhoc.ifconfig()
+        self.__adhoc = self.__CreateADHOCInterface(*addr)
+        
+Wifi = __Wifi()

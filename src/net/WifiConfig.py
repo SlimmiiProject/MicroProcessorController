@@ -1,20 +1,22 @@
 from re import search
-
-from src.Path import dirname, filename, writeFile
+from utils.Path import dirname, filename, writeFile, readFileLine, file_exists
+from utils.Crypt import XOR
+import json
 
 
 class __WifiConfig:
     __config = {
         "ssid": "",
         "password": "",
-        "adhoc_password": ""
+        "adhoc_password": "Sl1m1m3t3rP4ssw0rdF0rC0nnection"
     }
 
     __targetPath = ""
 
     def __init__(self, targetPath):
         self.__targetPath = targetPath
-        self.wlan_password = "hello world"
+        self.__readFile()
+        
 
     @property
     def wlan_ssid(self):
@@ -50,12 +52,18 @@ class __WifiConfig:
         self.__updateFile()
 
     def __updateFile(self):
-        writeFile(self.__targetPath, "".join([chr(ord(c)^129) for c in str(self.__config)]))
+        writeFile(self.__targetPath, XOR(json.dumps(self.__config)))
+        
+    def __readFile(self):
+        print()
+        if file_exists(self.__targetPath):
+            file_data = XOR(readFileLine(self.__targetPath))
+            self.__config = json.loads(file_data)
+
+         
         
 
 
 
-WifiConfig = __WifiConfig("./Wifi.bin")
+WifiConfig = __WifiConfig("/Wifi.bin")
 
-if __name__ == "__main__":
-    print(WifiConfig.wlan_password)

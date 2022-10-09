@@ -4,6 +4,7 @@ from re import search as searchPattern
 from components.scripts.Redirect import Redirect
 from components.layout.forms.WifiSelector import WifiSelector
 from net.www.WebserverRoute import WebserverRoute
+from net.Wifi import Wifi
 
 
 class Routes:
@@ -15,7 +16,7 @@ class Routes:
     @WebserverRoute.get("/wifi")
     def wifi_get(request, response):
         return response.render("/wifi", **{
-            "SSID_SELECTOR": WifiSelector("Network 1", "Network 2", "Network 3"), # todo: WLAN netwerk scan => Arg parse erin
+            "SSID_SELECTOR": WifiSelector(*[network["ssid"] for network in Wifi.networks]), # todo: WLAN netwerk scan => Arg parse erin
             "MESSAGE": "Failed to connect to wifi, please connect to a nearby access point"
         })
 
@@ -33,7 +34,7 @@ class Routes:
             message = "Wifi SSID or password was not set"
         
         return response.render("/wifi", **{
-            "SSID_SELECTOR": WifiSelector("Network 1", "Network 2", "Network 3"), # todo: WLAN netwerk scan => Arg parse erin
+            "SSID_SELECTOR": WifiSelector(*[network["ssid"] for network in Wifi.networks]), # todo: WLAN netwerk scan => Arg parse erin
             "MESSAGE": message
         })
 
