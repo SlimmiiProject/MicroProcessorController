@@ -1,59 +1,55 @@
- 
-from re import search as searchPattern
-
-from components.scripts.Redirect import Redirect
-from components.layout.forms.WifiSelector import WifiSelector
 from net.www.WebserverRoute import WebserverRoute
+from components.layout.forms.WifiSelector import WifiSelector
 from net.Wifi import Wifi
-
+from utils.Device import Device
+from net.WifiConfig import WifiConfig
 
 class Routes:
     @WebserverRoute.get("/")
     def index(request, response):
-        return response.send(Redirect("/wifi", 0))
-        return response.render("/index")
-
+    
+        return response.getFile("/index") 
+    
     @WebserverRoute.get("/wifi")
-    def wifi_get(request, response):
-        return response.render("/wifi", **{
-            "SSID_SELECTOR": WifiSelector(*[network["ssid"] for network in Wifi.networks]), # todo: WLAN netwerk scan => Arg parse erin
-            "MESSAGE": "Failed to connect to wifi, please connect to a nearby access point"
+    def wifi(request, response):
+        response.setParams(**{
+            "MESSAGE": "Already connected to wifi network" if Wifi.wifi_connected else "No wifi network specified, or failed to connect",
+            "SSID_SELECTOR": WifiSelector(*[network["ssid"] for network in Wifi.networks])
         })
-
+        
+        return response.getFile("/wifi") 
+    
     @WebserverRoute.post("/wifi")
-    def wifi_post(request, response):
-        params = request.PARAMS
-        message = """
-            <b>Attempting to connect to {ssid}.. page will reload in a second.</b>
-            {redirect}
-        """.format(ssid=" ".join(params["ssid"].split("+")), redirect=Redirect("/", 5000))
-        
-        if not len(request.PARAMS):
-            message = "Wifi not connected, please connect to a wifi access point."
-        elif not all(i in params.keys() for i in ["ssid", "password"]):
-            message = "Wifi SSID or password was not set"
-        
-        return response.render("/wifi", **{
-            "SSID_SELECTOR": WifiSelector(*[network["ssid"] for network in Wifi.networks]), # todo: WLAN netwerk scan => Arg parse erin
-            "MESSAGE": message
+    def wifi(request, response):
+        print(response.parameters)
+        response.setParams(**{
+            "MESSAGE": "Already connected to wifi network" if Wifi.wifi_connected else "No wifi network specified, or failed to connect",
+            "SSID_SELECTOR": WifiSelector(*[network["ssid"] for network in Wifi.networks])
         })
-
+        if all(key in response.parameters.keys() for key in ["ssid", "password"]):
+            WifiConfig.wlan_ssid = response.parameters["ssid"]
+            WifiConfig.wlan_password = response.parameters["password"]
+            Device.hard_reset()
+        
+        return response.getFile("/wifi")
+    
     @WebserverRoute.get("/change_adhoc")
-    def adhoc_set_get(request, response):
-        return response.render("/change_adhoc", **{
-            "MESSAGE": "Failed to connect to wifi, please connect to a nearby access point"
+    def adhoc(request, response):
+        response.setParams(**{
+            "MESSAGE": ""
         })
-
+        return response.getFile("/change_adhoc") 
+    
     @WebserverRoute.post("/change_adhoc")
-    def adhoc_set_post(request, response):
-        params = request.PARAMS
-
-        message = "<b>Assigning new access point password.</b>"
-        if not len(request.PARAMS) or not all(i in params.keys() for i in ["password", "password_verify"]):
-            message = "Invalid request"
-        elif params["password"] != params["password_verify"]:
-            message = "Passwords did not match"
-
-        return response.render("/change_adhoc", **{
-            "MESSAGE": message
-        })
+    def adhoc(request, response):
+        if any([i not in response.parameters.keys() for i in ["password_verify", "password"]]):
+            response.setParams(MESSAGE="Invalid request")
+        elif response.parameters["password"] != response.parameters["password_verify"]:
+            response.setParams(MESSAGE="Password did not match")
+        else:
+            response.setParams(MESSAGE="ADHOC password changed succesfully")
+            Device.hard_reset() 
+        
+        return response.getFile("/change_adhoc") 
+    
+    

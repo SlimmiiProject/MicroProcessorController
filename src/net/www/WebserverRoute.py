@@ -1,4 +1,3 @@
-
 class WebserverRoute:
     routes = []
 
@@ -20,7 +19,7 @@ class WebserverRoute:
         
         # Stel correcte parameter in op route variabele
         return kwargs["route"] if "route" in kwargs.keys() else args[0]
-
+    
     
     @staticmethod
     def get(*args, **kwargs):
@@ -58,3 +57,17 @@ class WebserverRoute:
                 return callback
         
         return False
+    
+    @staticmethod
+    def fetchRoute(targetMethod, targetRoute):
+        """
+            Fetch a HTTP request parser
+        """
+        for method, route, callback in WebserverRoute.routes:
+            print((method, route, callback))
+            if method == targetMethod and route == targetRoute:
+            
+                return callback
+        
+        return False
+

@@ -36,8 +36,8 @@ class __WifiConfig:
     @wlan_password.setter
     def wlan_password(self, value):
         assert isinstance(value, str)
-
         self.__config["password"] = value
+        
         self.__updateFile()
 
     @property
@@ -55,15 +55,9 @@ class __WifiConfig:
         writeFile(self.__targetPath, XOR(json.dumps(self.__config)))
         
     def __readFile(self):
-        print()
         if file_exists(self.__targetPath):
             file_data = XOR(readFileLine(self.__targetPath))
             self.__config = json.loads(file_data)
-
-         
-        
-
-
 
 WifiConfig = __WifiConfig("/Wifi.bin")
 
