@@ -16,7 +16,7 @@ void Application::setup()
   setenv("WIFI_PROFILE_PATH", (String(getenv("CONFIG_PATH"))+String("wifi.bin")).c_str(), 0);
 
   net.createAccessPoint("SlimiMeter", "H3LL0FR0MSL1M1IMaTesTAnDWILLB3ChanG3d");
-  net.wifiConnect("Proximus-Home-E808", "w6cf7npfmk4wk");
+  net.wifiConnect("", "");
 
   http.init(80);
 }
