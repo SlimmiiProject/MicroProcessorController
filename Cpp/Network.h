@@ -13,7 +13,7 @@ class Network
 {
   private: 
     /** @description: Max tries for making an access point or connection */
-    unsigned short int max_connection_attempts;
+    uint8_t max_connection_attempts;
 
     /** @description: Time to sleep between network attempt actions */
     unsigned short int sleep_in_ms;

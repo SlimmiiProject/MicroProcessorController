@@ -2,6 +2,7 @@
 #define Application_h 
 #include "Arduino.h"
 #include "Network.h"
+#include "Http.h"
 #include <SPIFFS.h>
 
 class Application 
@@ -15,6 +16,7 @@ class Application
   
   private: 
     Network net; 
+    Http http;
 };
 
 #endif 

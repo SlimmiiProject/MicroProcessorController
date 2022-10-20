@@ -2,6 +2,7 @@
 #include "Arduino.h"
 #include <SPIFFS.h>
 #include "Network.h"
+#include "Http.h"
 
 
 void Application::setup()
@@ -14,10 +15,10 @@ void Application::setup()
   setenv("AP_PROFILE_PATH", (String(getenv("CONFIG_PATH"))+String("ap.bin")).c_str(), 0);
   setenv("WIFI_PROFILE_PATH", (String(getenv("CONFIG_PATH"))+String("wifi.bin")).c_str(), 0);
 
-  Network net;  
   net.createAccessPoint("SlimiMeter", "H3LL0FR0MSL1M1IMaTesTAnDWILLB3ChanG3d");
-  //net.wifiConnect("SlimiMeter", "H3LO_W0RLD368");
+  net.wifiConnect("Proximus-Home-E808", "w6cf7npfmk4wk");
 
+  http.init(80);
 }
 
 void Application::main()
@@ -34,4 +35,6 @@ void Application::main()
   else 
     Serial.println("No wifi connection");
   
+  http.handleClient(true);
+  delay(1000);
 }
