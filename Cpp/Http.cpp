@@ -3,6 +3,7 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <WiFi.h>
+#include "Camera.h"
 
 AsyncWebServer server(80);
 
@@ -78,6 +79,8 @@ const char page_html[] PROGMEM = R"rawliteral(
                 <header>🗨&ensp;Reserved for possible title </header>
                 <div class="content-container">
                     {%CONTENT%}
+
+                    <img src="/camera.bmp" />
                 </div>
             </article>
         </section>
@@ -117,6 +120,7 @@ void Http::init()
 {
   server.on("/", HTTP_GET, getPage );
   server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){ request->send(200, "text/css", page_css); });
+  server.on("/capture.bmp", HTTP_GET, camera.sendBMPRequest);
 
   server.onNotFound([](AsyncWebServerRequest *request){  request->redirect("/"); });
   server.begin();

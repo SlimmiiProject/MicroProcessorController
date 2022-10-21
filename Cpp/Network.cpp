@@ -35,18 +35,10 @@ bool Network::wifiConnect(char *ssid, char *password)
   return connected;
 }
 
-IPAddress Network::wifiIP()
-{
-  return WiFi.localIP();
-}
+IPAddress Network::wifiIP() { return WiFi.localIP(); }
+IPAddress Network::apIP()  { return WiFi.softAPIP(); }
 
-IPAddress Network::apIP() 
-{
-  return WiFi.softAPIP();
-}
-
-
-bool Network::writeWifiProfile()
+bool Network::writeWifiProfile(NetworkProfile profile)
 {
   return 0;
 }

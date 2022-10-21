@@ -37,7 +37,12 @@ class Network
     /***
     * @description: Write a wifi profile to the device 
     */
-    bool writeWifiProfile();
+    bool writeWifiProfile(NetworkProfile profile);
+
+    /***
+    * @description: Write a wifi profile to the device 
+    */
+    NetworkProfile readNetworkProfile(char* path);
 
     /**
     * @description: The WiFi local IP Address 
