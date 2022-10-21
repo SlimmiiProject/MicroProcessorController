@@ -3,7 +3,7 @@
 #include <SPIFFS.h>
 #include "Network.h"
 #include "Http.h"
-
+//https://github.com/espressif/esp32-camera
 
 void Application::setup()
 {
@@ -18,7 +18,7 @@ void Application::setup()
   net.createAccessPoint("SlimiMeter", "H3LL0FR0MSL1M1IMaTesTAnDWILLB3ChanG3d");
   net.wifiConnect("", "");
 
-  http.init(80);
+  http.init();
 }
 
 void Application::main()
@@ -35,6 +35,5 @@ void Application::main()
   else 
     Serial.println("No wifi connection");
   
-  http.handleClient(true);
   delay(1000);
 }
