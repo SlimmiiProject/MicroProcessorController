@@ -80,7 +80,7 @@ const char page_html[] PROGMEM = R"rawliteral(
                 <div class="content-container">
                     {%CONTENT%}
 
-                    <img src="/camera.bmp" />
+                    <img src="/capture.jpg" />
                 </div>
             </article>
         </section>
@@ -116,11 +116,29 @@ void Http::getPage(AsyncWebServerRequest *request) {
   request->send_P(200, "text/html", current_template.c_str(), templateParser);
 }
 
+void Http::sendImage(AsyncWebServerRequest *request)
+{
+  uint8_t * buf = NULL;
+  size_t buf_len = 0;
+  if(camera.getCaptureBytes(JPEG, &buf, &buf_len) != ESP_OK)
+  {
+    request->send(500, "plain/text", "Server error: Failed to get camera bytes"); 
+    return;
+  }
+
+  AsyncWebServerResponse *response = request->beginResponse_P(200,"image/jpeg", buf, buf_len);
+  response->addHeader("Content-Disposition", "inline; filename=capture.jpg");
+  request->send(response);
+
+  // deallocate buffer bytes.
+  free(buf);
+}
+
 void Http::init()
 {
   server.on("/", HTTP_GET, getPage );
   server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){ request->send(200, "text/css", page_css); });
-  server.on("/capture.bmp", HTTP_GET, camera.sendBMPRequest);
+  server.on("/capture.jpg", HTTP_GET, sendImage);
 
   server.onNotFound([](AsyncWebServerRequest *request){  request->redirect("/"); });
   server.begin();

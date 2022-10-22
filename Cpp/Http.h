@@ -15,9 +15,10 @@ class Http
     void init();
   
   private:
-    Camera camera; 
+    static Camera camera; 
     static void getPage(AsyncWebServerRequest *request);
     static char* getPageState();
     static String templateParser(const String& key);
+    static void sendImage(AsyncWebServerRequest *request);
 };
 #endif

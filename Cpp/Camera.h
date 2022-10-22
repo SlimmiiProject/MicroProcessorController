@@ -23,6 +23,17 @@
 #define CAM_PIN_HREF    23
 #define CAM_PIN_PCLK    22
 
+
+typedef struct {
+  AsyncWebServerRequest *req;
+  size_t len;
+} jpeg_chunk_t;
+
+enum image_type {
+  JPEG = 0,
+  BMP  = 1
+};
+
 // Set configuration (pins, channels, camera rendering specifications)
 // Format: VGA (640x480)
 // PixeFormat: Grayscale 
@@ -47,7 +58,7 @@ static camera_config_t camera_config = {
     .pin_href = CAM_PIN_HREF,
     .pin_pclk = CAM_PIN_PCLK,
 
-    .xclk_freq_hz = 20000000,
+    .xclk_freq_hz = 16000000,
     .ledc_timer = LEDC_TIMER_0,
     .ledc_channel = LEDC_CHANNEL_0,
 
@@ -65,15 +76,20 @@ class Camera
   public: 
     /** @description: Power up if required (powerpin != -1) and initialize the camera.  */
     static esp_err_t camera_init();
+    static esp_err_t getCaptureBytes(image_type type, uint8_t **bufferPtr, size_t * lengthPtr);
 
+    /** @description: Fetch current camera frame, convert to BMP and send response to client.  */
+    static esp_err_t sendBMPRequest(AsyncWebServerRequest *request);
+    static esp_err_t sendJPEGRequest(AsyncWebServerRequest *request);
+
+  private:
     /** @description: Try to get current camera frame buffer and allocate to a memory address specified as {outputBuffer} parameter */
     static esp_err_t getFrameBuffer(camera_fb_t ** outputBuffer);
     
     /** @description: Convert a frame buffer to BMP pixel format and allocate the {buffer} and {length} to the memory address specified as parameter  */
     static esp_err_t convertToBMP(camera_fb_t * ptr, uint8_t ** buffer, size_t * length);
+    static esp_err_t convertToJPEG(camera_fb_t * ptr, uint8_t ** buffer, size_t * length);
 
-    /** @description: Fetch current camera frame, convert to BMP and send response to client.  */
-    static esp_err_t sendBMPRequest(AsyncWebServerRequest *request);
 };
 
 
