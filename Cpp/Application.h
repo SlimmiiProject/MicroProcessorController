@@ -1,22 +1,19 @@
 #ifndef Application_h
 #define Application_h 
+#include <SPIFFS.h>
 #include "Arduino.h"
 #include "Network.h"
 #include "Http.h"
-#include <SPIFFS.h>
+#include "API.h"
 
 class Application 
 {
   public: 
     /** @description: Setup the enviroment and application services */
-    void setup(); 
+    static void setup(); 
 
     /** @description: The main execution loop for the application. */
-    void main(); 
-  
-  private: 
-    Network net; 
-    Http http;
+    static void main(); 
 };
 
 #endif 

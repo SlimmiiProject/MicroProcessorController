@@ -3,10 +3,7 @@
 #include "esp_camera.h"
 #include <ESPAsyncWebServer.h>
 
-/**
-* Power up (if needed) and initialize camera
-*/
-esp_err_t Camera::camera_init()
+esp_err_t Camera::init()
 {
     //power up the camera if PWDN pin is defined
     if(CAM_PIN_PWDN != -1)
@@ -22,7 +19,6 @@ esp_err_t Camera::camera_init()
         ESP_LOGE(TAG, "Camera Init Failed");
         return err;
     }
-
     return ESP_OK;
 }
 
@@ -36,7 +32,7 @@ esp_err_t Camera::getFrameBuffer(camera_fb_t ** outputBuffer)
 
     return ESP_FAIL;
   }
-    
+  
   return ESP_OK;
 }
 

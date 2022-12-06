@@ -4,18 +4,20 @@
 *  Required libraries: 
 * - https://github.com/espressif/esp32-camera
 * - https://github.com/me-no-dev/ESPAsyncWebServer
-* - https://github.com/me-no-dev/AsyncTCP
+* - https://github.com/me-no-dev/
+* - https://github.com/instanceofMA/arduino-fetch
 */
-
 #include <WiFi.h>
 #include "Application.h"
 
-Application app; 
+#define MS_PER_TICK 1000
+#define MIN_TICK 10
+
 void setup() 
 {
-  app.setup();
+  Application::setup();
 }
 
 void loop() {
-  app.main();
+  Application::main();
 }
