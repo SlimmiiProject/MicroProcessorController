@@ -3,11 +3,9 @@
 #include "esp_camera.h"
 #include <ESPAsyncWebServer.h>
 
-/**
-* Power up (if needed) and initialize camera
-*/
-esp_err_t Camera::camera_init()
+esp_err_t Camera::init()
 {
+  Serial.println("[Camera]: Initializing camera...");
     //power up the camera if PWDN pin is defined
     if(CAM_PIN_PWDN != -1)
     {
@@ -22,7 +20,6 @@ esp_err_t Camera::camera_init()
         ESP_LOGE(TAG, "Camera Init Failed");
         return err;
     }
-
     return ESP_OK;
 }
 
@@ -31,12 +28,12 @@ esp_err_t Camera::getFrameBuffer(camera_fb_t ** outputBuffer)
   *outputBuffer = esp_camera_fb_get();
   if (!outputBuffer) 
   {
-    ESP_LOGE(TAG, "Failed to get current frame from camera");
-    Serial.println("Failed to get current frame from camera");
+    ESP_LOGE(TAG, "[Camera]: Failed to get current frame from camera");
+    Serial.println("[Camera]: Failed to get current frame from camera");
 
     return ESP_FAIL;
   }
-    
+  
   return ESP_OK;
 }
 
@@ -44,7 +41,7 @@ esp_err_t Camera::convertToBMP(camera_fb_t * ptr, uint8_t ** buffer, size_t * le
 {
     if(!ptr)
     {
-      ESP_LOGE(TAG, "Attempting to convert with pointer to frame buffer");
+      ESP_LOGE(TAG, "[Camera]: Attempting to convert with pointer to frame buffer");
       return ESP_FAIL;
     }
 
@@ -53,8 +50,8 @@ esp_err_t Camera::convertToBMP(camera_fb_t * ptr, uint8_t ** buffer, size_t * le
 
     if(!converted)
     {
-      ESP_LOGE(TAG, "Camera frame buffer to BMP conversion failed");
-      Serial.println("Camera frame buffer to BMP conversion failed");
+      ESP_LOGE(TAG, "[Camaera]: Camera frame buffer to BMP conversion failed");
+      Serial.println("[Camera]: Camera frame buffer to BMP conversion failed");
       
       return ESP_FAIL;
     }
@@ -66,7 +63,7 @@ esp_err_t Camera::convertToJPEG(camera_fb_t * frameBuffer, uint8_t ** buffer, si
 {
     if(!frameBuffer)
     {
-      ESP_LOGE(TAG, "Attempting to convert with pointer to frame buffer");
+      ESP_LOGE(TAG, "[Camera]: Attempting to convert with pointer to frame buffer");
       return ESP_FAIL;
     }
 
@@ -77,8 +74,8 @@ esp_err_t Camera::convertToJPEG(camera_fb_t * frameBuffer, uint8_t ** buffer, si
     }
     else if (!frame2jpg(frameBuffer, camera_config.jpeg_quality, buffer, length))
     {
-      ESP_LOGE(TAG, "Camera frame buffer to JPEG conversion failed");
-      Serial.println("Camera frame buffer to JPEG conversion failed");
+      ESP_LOGE(TAG, "[Camera]: Camera frame buffer to JPEG conversion failed");
+      Serial.println("[Camera]: Camera frame buffer to JPEG conversion failed");
       return ESP_FAIL;
     }
 

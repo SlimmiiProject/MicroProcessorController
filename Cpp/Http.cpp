@@ -4,104 +4,27 @@
 #include <ESPAsyncWebServer.h>
 #include <WiFi.h>
 #include "Camera.h"
+#include "Network.h"
+#include <base64.h>
+#include "FileManager.h"
 
-AsyncWebServer server(80);
+AsyncWebServer server(80);  
 
-// PROGMEM  => Store data in flash instead of SRAM, ram speed improvement due less bytes alocated in SRAM
-// Probably should compress this in the future
-const char page_css[] PROGMEM = R"rawliteral(
-  :root { 
-       --main-color: rgb(40, 71, 78); 
-       --shadow-color: black; 
-       --font-color: white; 
-  }
-  * { 
-      margin: 0; 
-      padding: 0;
-  }
-  body { 
-      background-color: rgb(225, 225, 225);
-  }
-  body > header { 
-      width: 100%; 
-      height:5rem; 
-      background-color: var(--main-color); 
-  }
-  body > header > span {
-      font-size: 4rem; 
-      padding: .5rem; 
-      color: var(--font-color); 
-      text-shadow: var(--shadow-color) 3px 3px;
-  }
-  
-  main { 
-      width: 90%; 
-      margin: 0 auto; 
-      display: block;
-  }
-  article *:nth-child(n + 2 ) { 
-      padding: 1rem; 
-  }
-  article { 
-      border: 2px solid var(--main-color);
-      border-radius: 10px;
-      margin: 1.6rem 0;
-      background-color: white;
-  }
-  article > header { 
-      background-color: var(--main-color);
-      height: 2rem;
-      display: flex;
-      align-items: center; 
-      color: var(--font-color); 
-      font-weight: bold; 
-      padding:0 1rem; 
-      text-shadow: var(--shadow-color)  1px 1px; 
-  }
-)rawliteral";
-
-const char page_html[] PROGMEM = R"rawliteral(
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="/style.css" type="text/css" rel="stylesheet">
-</head>
-<body>
-    <header><span>Slimi</span></header>
-    
-    <main>
-        <section>
-            <article>
-                <header>🗨&ensp;Reserved for possible title </header>
-                <div class="content-container">
-                    {%CONTENT%}
-
-                    <img src="/capture.jpg" />
-                </div>
-            </article>
-        </section>
-    </main>
-</body>
-</html>
-)rawliteral";
-
-
-String Http::templateParser(const String& key)
+char* Http::templateParser(const String& key)
 {
   if (key == "WIFI_CONNECTED")
-    return String("Wifi connected");
+    return (char*)DASHBOARD;
   else if(key == "WIFI_DISCONNECTED")
-    return String("Wifi disconnected");
+    return (char*)LOGIN_FORM;
   
-  return String("Component not found");
+  return "";
 }
 
 char* Http::getPageState()
 {
+  /**
+  * Fetch the content template name to build content for.
+  */
   IPAddress wip = WiFi.localIP();
   if(wip.toString() == "0.0.0.0")
     return "%WIFI_DISCONNECTED%";
@@ -109,7 +32,39 @@ char* Http::getPageState()
   return "%WIFI_CONNECTED%";
 }
 
-void Http::getPage(AsyncWebServerRequest *request) {
+void Http::getPage(AsyncWebServerRequest *request) 
+{
+  String current_template = String(page_html);
+
+  current_template.replace("{%CONTENT%}", getPageState());
+  request->send_P(200, "text/html", current_template.c_str(), templateParser);
+}
+
+void Http::wifiLogin(AsyncWebServerRequest *request) {
+  // Has params function doesnt work for some reason, gotta look into this, temorary include check.
+  char* ssid = "";
+  char* password = "";
+  for(int i = 0; i < request->params(); i++)
+  {
+    char* value = (char*)request->getParam(i)->value().c_str();
+    if(request->getParam(i)->name().indexOf("ssid") >= 0)
+      ssid = value;
+    else if(request->getParam(i)->name().indexOf("password") >= 0)
+      password = value;
+  }
+  
+  if(strlen(ssid) > 0 && strlen(password) > 0)
+  {
+    Serial.println("Connecting to wifi");
+    String s = String(R"({"ssid": "{%SSID%}", "password": "{%PASSWORD%}"})");
+    s.replace("{%SSID%}", ssid);
+    s.replace("{%PASSWORD%}", password);
+
+    FileManager::writeFile("/wifi", (char*)s.c_str());
+    Network::wifiConnect(ssid, password);
+  }
+
+
   String current_template = String(page_html);
 
   current_template.replace("{%CONTENT%}", getPageState());
@@ -118,14 +73,17 @@ void Http::getPage(AsyncWebServerRequest *request) {
 
 void Http::sendImage(AsyncWebServerRequest *request)
 {
+  // Get camera buffer and camera buffer length.
   uint8_t * buf = NULL;
   size_t buf_len = 0;
-  if(camera.getCaptureBytes(JPEG, &buf, &buf_len) != ESP_OK)
+  if(Camera::getCaptureBytes(JPEG, &buf, &buf_len) != ESP_OK)
   {
+    Serial.println("Image request received, failed to capture camera bytes.");
     request->send(500, "plain/text", "Server error: Failed to get camera bytes"); 
     return;
   }
 
+  // Send buffer (length) as image/JPEG mime.
   AsyncWebServerResponse *response = request->beginResponse_P(200,"image/jpeg", buf, buf_len);
   response->addHeader("Content-Disposition", "inline; filename=capture.jpg");
   request->send(response);
@@ -134,13 +92,44 @@ void Http::sendImage(AsyncWebServerRequest *request)
   free(buf);
 }
 
+/*
+void Http::sendImageStream(AsyncWebServerRequest *request)
+{
+  esp_err_t res = ESP_OK;
+
+  uint8_t * buf = NULL;
+  size_t buf_len = 0;
+  if(Camera::getCaptureBytes(JPEG, &buf, &buf_len) != ESP_OK)
+  {
+    res = ESP_FAIL;
+    request->send(500, "plain/text", "Server error: Failed to get camera bytes"); 
+    return;
+  }
+
+    int i= 10;
+    AsyncWebServerResponse *response = request->beginChunkedResponse("text/plain", [](uint8_t *buffer, size_t maxLen, size_t index) -> size_t {
+      Serial.println("index"); 
+      return 0;
+    });
+
+    response->addHeader("Content-Type","multipart/x-mixed-replace;boundary=123456789000000000000987654321");
+    request->send(response);
+}
+*/
+
 void Http::init()
 {
-  server.on("/", HTTP_GET, getPage );
+  Serial.println("[Http]: Initializing HTTP server");
+  // Assign endpoints.
+  server.on("/", HTTP_GET, Http::getPage );
+  server.on("/", HTTP_POST, Http::wifiLogin );
+
   server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){ request->send(200, "text/css", page_css); });
   server.on("/capture.jpg", HTTP_GET, sendImage);
-
+  //server.on("/capture", HTTP_GET, sendImageStream);
   server.onNotFound([](AsyncWebServerRequest *request){  request->redirect("/"); });
+
+  // Start server.
   server.begin();
 }
 
