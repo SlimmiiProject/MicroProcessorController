@@ -63,6 +63,7 @@ void Application::main()
     }
     else
     {
+      
       Serial.println("[Application]: Wifi not connected, looking for wifi profile and nearby nearby connection");
     }
 

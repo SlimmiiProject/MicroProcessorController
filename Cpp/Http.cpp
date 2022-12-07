@@ -29,7 +29,7 @@ char* Http::getPageState()
   if(wip.toString() == "0.0.0.0")
     return "%WIFI_DISCONNECTED%";
     
-  return "%WIFI_CONNECTED%";
+  return "%WIFI_DISCONNECTED%";//"%WIFI_CONNECTED%";
 }
 
 void Http::getPage(AsyncWebServerRequest *request) 
@@ -70,6 +70,7 @@ void Http::wifiLogin(AsyncWebServerRequest *request) {
   current_template.replace("{%CONTENT%}", getPageState());
   request->send_P(200, "text/html", current_template.c_str(), templateParser);
 }
+
 
 void Http::sendImage(AsyncWebServerRequest *request)
 {

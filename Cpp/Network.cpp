@@ -19,6 +19,9 @@ bool Network::createAccessPoint(char * ssid, char * password)
     delay(SLEEP_IN_MS);
   }
 
+  Serial.print("Wifi state: ");
+  Serial.println(String(connected ? "C" : "Disc")+"onnected");
+
   return connected;
 }
 
