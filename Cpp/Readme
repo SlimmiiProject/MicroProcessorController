@@ -1,0 +1,15 @@
+Setup: 
+
+Open Cpp.ino with arduino IDE
+(on first boot): 
+-> Setup arduino IDE to ESP32 freenove = https://raw.githubusercontent.com/Freenove/Freenove_Ultimate_Starter_Kit_for_ESP32/master/C/C_Tutorial.pdf
+-> Add libraries from lib folder to arduino IDE (sketch -> Include library -> add ZIP library)
+-> Setup SERVER_URI to the API server endpoint.
+-> Flash firmware.
+
+Setup device:
+-> Join device network. (password: H3LL0FR0MSL1M1IMaTesTAnDWILLB3ChanG3d)
+-> go to 192.168.4.1 (general access network IP) 
+-> Enter WIFI SSID & password.
+-> Enter enter API key 
+
