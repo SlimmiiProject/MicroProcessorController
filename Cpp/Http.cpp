@@ -1,4 +1,4 @@
-#include "http.h"
+#include "Http.h"
 #include "Arduino.h"
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
@@ -10,6 +10,9 @@
 
 AsyncWebServer server(80);  
 
+/**
+* Component loader.
+*/
 char* Http::templateParser(const String& key)
 {
   if (key == "WIFI_CONNECTED")
@@ -20,6 +23,9 @@ char* Http::templateParser(const String& key)
   return "";
 }
 
+/**
+* Page state parser.
+*/
 char* Http::getPageState()
 {
   /**
@@ -29,7 +35,7 @@ char* Http::getPageState()
   if(wip.toString() == "0.0.0.0")
     return "%WIFI_DISCONNECTED%";
     
-  return "%WIFI_DISCONNECTED%";//"%WIFI_CONNECTED%";
+  return "%WIFI_CONNECTED%";
 }
 
 void Http::getPage(AsyncWebServerRequest *request) 
@@ -71,6 +77,29 @@ void Http::wifiLogin(AsyncWebServerRequest *request) {
   request->send_P(200, "text/html", current_template.c_str(), templateParser);
 }
 
+void Http::updateSettings(AsyncWebServerRequest *request) {
+  // Has params function doesnt work for some reason, gotta look into this, temorary include check.
+  char* accessPassword = "";
+  char* apiKey = "";
+
+  // Request getparam => name didnt work for some reason.
+  for(int i = 0; i < request->params(); i++)
+  {
+    char* value = (char*)request->getParam(i)->value().c_str();
+    if(request->getParam(i)->name().indexOf("adhocPassword") >= 0)
+      accessPassword = value;
+    else if(request->getParam(i)->name().indexOf("userKey") >= 0)
+      apiKey = value;
+  }
+
+  if(strlen(accessPassword))
+    FileManager::writeFile("/adhoc", accessPassword);
+
+  FileManager::writeFile("/apiToken", apiKey);
+
+  request->redirect("/");
+}
+
 
 void Http::sendImage(AsyncWebServerRequest *request)
 {
@@ -93,30 +122,12 @@ void Http::sendImage(AsyncWebServerRequest *request)
   free(buf);
 }
 
-/*
-void Http::sendImageStream(AsyncWebServerRequest *request)
+
+void Http::logout(AsyncWebServerRequest *request)
 {
-  esp_err_t res = ESP_OK;
-
-  uint8_t * buf = NULL;
-  size_t buf_len = 0;
-  if(Camera::getCaptureBytes(JPEG, &buf, &buf_len) != ESP_OK)
-  {
-    res = ESP_FAIL;
-    request->send(500, "plain/text", "Server error: Failed to get camera bytes"); 
-    return;
-  }
-
-    int i= 10;
-    AsyncWebServerResponse *response = request->beginChunkedResponse("text/plain", [](uint8_t *buffer, size_t maxLen, size_t index) -> size_t {
-      Serial.println("index"); 
-      return 0;
-    });
-
-    response->addHeader("Content-Type","multipart/x-mixed-replace;boundary=123456789000000000000987654321");
-    request->send(response);
+  Network::wifiDisconnect();
+  request->redirect("/");
 }
-*/
 
 void Http::init()
 {
@@ -124,6 +135,8 @@ void Http::init()
   // Assign endpoints.
   server.on("/", HTTP_GET, Http::getPage );
   server.on("/", HTTP_POST, Http::wifiLogin );
+  server.on("/disconnect", HTTP_GET, Http::logout );
+  server.on("/updateSettings", HTTP_POST, Http::updateSettings );
 
   server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){ request->send(200, "text/css", page_css); });
   server.on("/capture.jpg", HTTP_GET, sendImage);

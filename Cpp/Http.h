@@ -65,6 +65,10 @@ const char page_css[] PROGMEM = R"rawliteral(
     justify-content: center;
     flex-direction: column;
   }
+  w-100 
+  {
+    width: 100%;
+  }
   
 )rawliteral";
 
@@ -108,15 +112,24 @@ const char LOGIN_FORM[] PROGMEM = R"rawliteral(
 )rawliteral";
 
 const char DASHBOARD[] PROGMEM = R"rawliteral(
-  <strong>WIFI</strong>
-  - <a href="/disconnect">Disconnect from wifi</a>
 
+  <form method="POST" action="/updateSettings">
+    <table>
+      <tr>
+        <td><strong>WIFI</strong></td>
+        <td><a href="/disconnect">Disconnect from wifi</a></td>
+      </tr>
+      <tr>
+        <td><strong>ADHOC Password:</strong></td>
+        <td><input type="text" name="adhocPassword" class="w-100" id="adhocPassword" placeholder="Leave open to remain unchanged..."/> </td>
+      </tr>
+      <tr>
+        <td><strong><label for="userKey">API user key:</label></strong></td>
+        <td><input type="text" name="userKey" class="w-100" id="userKey" placeholder="Your slimmi session key..." required/> </td>
+      </tr>
+    </table>
 
-  <strong>ADHOC</strong>
-  <form method="POST">
-    <label for="adhocPassword">Access point password:</label>
-    <input type="text" name="adhocPassword" id="adhocPassword" required/>
-    <input type="submit" value="change password" />
+    <input type="submit" value="Update settings" />
   </form>
 )rawliteral";
 
@@ -152,5 +165,7 @@ class Http
     static void sendImage(AsyncWebServerRequest *request);
     static void sendImageStream(AsyncWebServerRequest *request);
     static void wifiLogin(AsyncWebServerRequest *request);
+    static void updateSettings(AsyncWebServerRequest *request);
+    static void logout(AsyncWebServerRequest *request);
 };
 #endif

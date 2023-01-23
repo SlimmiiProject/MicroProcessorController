@@ -14,8 +14,10 @@ void Application::initDefaults()
 {
   Serial.println("[Application]: Checking filesystem...");
   // Create ADHOC password file if not exists and setup ADHOC network.
+  
   if(!FileManager::fileExists("/adhoc"))
     FileManager::writeFile("/adhoc", "H3LL0FR0MSL1M1IMaTesTAnDWILLB3ChanG3d");
+  
 }
 
 void Application::initHardware()
@@ -23,16 +25,22 @@ void Application::initHardware()
   Camera::init();
 
   Serial.println("[Application]: Creating access point...");
-  Network::createAccessPoint("WaifuFi™", (char*)FileManager::readFile("/adhoc").c_str());
+  Network::createAccessPoint("SlimmiMeter™", (char*)FileManager::readFile("/adhoc").c_str());
 
   // Initialize the HTTP server before WIFI setup so server is bound to access point address. (192.168.4.1)
-  Http::init();
+  try
+  {
+    Http::init();
+  } catch(int e) {
+    Serial.println("Failed to initialize web server...");
+  }
+  
 
   // Attempt to initialize previous wifi connection if found.
   Serial.println("[Application]: Checking WiFi...");
-  bool connected =  Network::wifiConnect();
   if(Network::wifiProfileSet())
   {
+    bool connected =  Network::wifiConnect();
     Serial.printf("[Application]: WiFI %s %s", connected ? "succesfully connected" : "failed to connect");
   } Serial.printf("[Application]: No WiFi profile found, skipping wifi initilization...");
   
@@ -53,6 +61,7 @@ void Application::setup()
 int currentTick = 0;
 void Application::main()
 {
+  
   if(currentTick++ >= TICKS_REQUIRED)
   {
     if(Network::wifiConnected())
@@ -64,7 +73,10 @@ void Application::main()
     else
     {
       
-      Serial.println("[Application]: Wifi not connected, looking for wifi profile and nearby nearby connection");
+      if(Network::wifiProfileSet())
+      {
+        Serial.println("[Application]: Wifi not connected, looking for wifi profile and nearby nearby connection");
+      } else Serial.println("No wifi profile set, waiting for user to authenticate");
     }
 
     currentTick -= TICKS_REQUIRED;

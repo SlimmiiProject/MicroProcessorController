@@ -35,6 +35,11 @@ bool Network::wifiProfileSet()
   return FileManager::fileExists("/wifi");
 }
 
+void Network::wifiDisconnect()
+{
+  WiFi.disconnect(true);
+}
+
 bool Network::wifiConnect()
 {
   NetworkProfile profile = Network::readNetworkProfile();

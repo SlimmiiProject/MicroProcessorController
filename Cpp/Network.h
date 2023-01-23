@@ -41,6 +41,8 @@ class Network
     */
     static bool wifiConnect(char* ssid, char* password);
 
+    static void wifiDisconnect();
+
     /***
     * @description: Checks or the current wifiIP is set to the local gateway address, rturns true if not set to that address.
     * @returns: Connected?
