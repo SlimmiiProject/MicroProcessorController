@@ -1,14 +1,21 @@
 /**
 * Arduino ino ew run file. (better not to write code here, all ino files get concatenated based on alphabatical order, this results in unwanted bugs sometimes.)
+*
 */
+#include <WiFi.h>
 #include "Application.h"
+#include "Network.h"
 
-Application app; 
+#define MS_PER_TICK 1000
+#define MIN_TICK 10
+
 void setup() 
 {
-  app.setup();
+  Application::setup();
+
+  Serial.printf("Wifi profile: %s\n", Network::wifiProfileSet() ? "Set" : "Not found");
 }
 
 void loop() {
-  app.main();
+  Application::main();
 }
